@@ -1,0 +1,62 @@
+# Wild Rydes pricing service
+service: wild-rydes-pricing
+
+plugins:
+  - serverless-python-requirements
+
+custom:
+  stage: "${opt:stage, env:SLS_STAGE, 'dev'}"
+  profile: "${opt:aws-profile, env:AWS_PROFILE, env:AWS_DEFAULT_PROFILE, 'default'}"
+  log_level: "${env:LOG_LEVEL, 'INFO'}"
+
+provider:
+  name: aws
+  runtime: python3.6
+  stage: ${self:custom.stage}
+  profile: ${self:custom.profile}
+  environment:
+    LOG_LEVEL: ${self:custom.log_level}
+  stackTags:
+    serverless:service: ${self:service}
+
+functions:
+  GetPricing:
+    handler: handlers/get_pricing.handler
+    description: "Get pricing multiple (discount / surge)"
+    memorySize: 128
+    timeout: 10
+    events:
+      - http:
+          path: /pricing
+          method: get
+
+resources:
+  Resources:
+    PricingUrlSsmParam:
+      Type: "AWS::SSM::Parameter"
+      Properties:
+        Name: "/${self:service}/${self:provider.stage}/URL"
+        Type: String
+        Value:
+          Fn::Join:
+            - ""
+            - - "https://"
+              - Ref: ApiGatewayRestApi
+              - ".execute-api."
+              - Ref: AWS::Region
+              - ".amazonaws.com/${self:custom.stage}"
+
+  Outputs:
+    ServiceUrl:
+      Description: "URL for the deployed API on API Gateway"
+      Value:
+        Fn::Join:
+          - ""
+          - - "https://"
+            - Ref: ApiGatewayRestApi
+            - ".execute-api."
+            - Ref: AWS::Region
+            - ".amazonaws.com/${self:custom.stage}"
+      Export:
+        Name: "${self:service}-${self:provider.stage}-ServiceUrl"
+
