@@ -22,12 +22,15 @@ def _random_slowdown():
 
 def _get_pricing_multiple():
     '''Return pricing multiple.'''
+    multiple = 1
     if random.randint(1, 10) > 8:
         multiple = _get_pricing_multiple_discount()
         _logger.info('DISCOUNT: {}'.format(multiple))
     elif random.randint(1, 10) < 3:
         multiple = _get_pricing_multiple_surge()
         _logger.info('SURGE: {}'.format(multiple))
+    else:
+        _logger.info('STANDARD')
 
     return multiple
 
