@@ -15,9 +15,9 @@ _logger = logging.getLogger(__name__)
 def _random_slowdown():
     '''Add a random slow down to annoy people.'''
     # random slow down.
-    if random.randint(1, 10) > 8:
+    if random.randint(1, 100) > 95:
         _logger.info('Hit slowdown...')
-        time.sleep((100 - random.randint(5, 20)) / 100)
+        time.sleep(random.randint(3, 8))
 
 
 def _get_pricing_multiple():
